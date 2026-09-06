@@ -26,7 +26,7 @@ export function loadModel(url: string): Promise<THREE.Group> {
           resolve(gltf.scene);
         },
         undefined,
-        (err) => reject(err),
+        () => reject(new Error(`[model] nie wczytano ${url}`)),
       );
     });
     cache.set(url, pending);

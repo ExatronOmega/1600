@@ -7,8 +7,9 @@ import { loadingManager } from './loading.ts';
 // public/textures/board-map.jpg i serwowany razem z aplikacją.
 // Setting gry jest wcześniejszy (ok. 1600–1650) — mapa to materiał wizualny.
 //
-// Wszystkie ścieżki przez BASE_URL, żeby działał i dev (/), i GitHub Pages (/1600/).
-const BASE = import.meta.env.BASE_URL;
+// Wszystkie ścieżki liczone od URL strony (a nie od roota serwera),
+// żeby działał i dev pod /, i dev pod /1600/, i GitHub Pages pod /1600/.
+const BASE = new URL(import.meta.env.BASE_URL, window.location.href).href;
 export const BOARD_MAP_URL = `${BASE}textures/board-map.jpg`;
 
 const texLoader = new THREE.TextureLoader(loadingManager);
@@ -39,7 +40,7 @@ export function loadTexture(url: string, opts: TexOptions = {}): Promise<THREE.T
         resolve(tex);
       },
       undefined,
-      (err) => reject(err),
+      (err) => reject(new Error(`[tex] nie wczytano ${url}: ${String(err).slice(0, 120)}`)),
     );
   });
 }
