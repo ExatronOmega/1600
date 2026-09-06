@@ -6,7 +6,10 @@ import { loadingManager } from './loading.ts';
 // Oryginał z XVIII w. — domena publiczna; plik ściągnięty lokalnie do
 // public/textures/board-map.jpg i serwowany razem z aplikacją.
 // Setting gry jest wcześniejszy (ok. 1600–1650) — mapa to materiał wizualny.
-export const BOARD_MAP_URL = '/textures/board-map.jpg';
+//
+// Wszystkie ścieżki przez BASE_URL, żeby działał i dev (/), i GitHub Pages (/1600/).
+const BASE = import.meta.env.BASE_URL;
+export const BOARD_MAP_URL = `${BASE}textures/board-map.jpg`;
 
 const texLoader = new THREE.TextureLoader(loadingManager);
 const textureCache = new Map<string, THREE.Texture>();
@@ -76,31 +79,31 @@ export async function loadPBRMaterial(
 
 export const PBR = {
   stoneWall: {
-    diff: '/textures/pbr/medieval_wall_02/medieval_wall_02_diff_2k.jpg',
-    nor: '/textures/pbr/medieval_wall_02/medieval_wall_02_nor_gl_2k.jpg',
-    rough: '/textures/pbr/medieval_wall_02/medieval_wall_02_rough_2k.jpg',
+    diff: `${BASE}textures/pbr/medieval_wall_02/medieval_wall_02_diff_2k.jpg`,
+    nor: `${BASE}textures/pbr/medieval_wall_02/medieval_wall_02_nor_gl_2k.jpg`,
+    rough: `${BASE}textures/pbr/medieval_wall_02/medieval_wall_02_rough_2k.jpg`,
   } as PBRSet,
   plasterWall: {
-    diff: '/textures/pbr/medieval_wall_01/medieval_wall_01_diff_2k.jpg',
-    nor: '/textures/pbr/medieval_wall_01/medieval_wall_01_nor_gl_2k.jpg',
-    rough: '/textures/pbr/medieval_wall_01/medieval_wall_01_rough_2k.jpg',
+    diff: `${BASE}textures/pbr/medieval_wall_01/medieval_wall_01_diff_2k.jpg`,
+    nor: `${BASE}textures/pbr/medieval_wall_01/medieval_wall_01_nor_gl_2k.jpg`,
+    rough: `${BASE}textures/pbr/medieval_wall_01/medieval_wall_01_rough_2k.jpg`,
   } as PBRSet,
   stoneFloor: {
-    diff: '/textures/pbr/monastery_stone_floor/monastery_stone_floor_diff_2k.jpg',
-    nor: '/textures/pbr/monastery_stone_floor/monastery_stone_floor_nor_gl_2k.jpg',
-    rough: '/textures/pbr/monastery_stone_floor/monastery_stone_floor_rough_2k.jpg',
+    diff: `${BASE}textures/pbr/monastery_stone_floor/monastery_stone_floor_diff_2k.jpg`,
+    nor: `${BASE}textures/pbr/monastery_stone_floor/monastery_stone_floor_nor_gl_2k.jpg`,
+    rough: `${BASE}textures/pbr/monastery_stone_floor/monastery_stone_floor_rough_2k.jpg`,
   } as PBRSet,
   oldWood: {
-    diff: '/textures/pbr/medieval_wood/medieval_wood_diff_2k.jpg',
-    nor: '/textures/pbr/medieval_wood/medieval_wood_nor_gl_2k.jpg',
-    rough: '/textures/pbr/medieval_wood/medieval_wood_rough_2k.jpg',
+    diff: `${BASE}textures/pbr/medieval_wood/medieval_wood_diff_2k.jpg`,
+    nor: `${BASE}textures/pbr/medieval_wood/medieval_wood_nor_gl_2k.jpg`,
+    rough: `${BASE}textures/pbr/medieval_wood/medieval_wood_rough_2k.jpg`,
   } as PBRSet,
 };
 
 export const MODELS = {
-  crate: '/models/wooden_crate_01/wooden_crate_01_1k.gltf',
-  bookSet: '/models/book_encyclopedia_set_01/book_encyclopedia_set_01_1k.gltf',
-  candleholders: '/models/brass_candleholders/brass_candleholders_1k.gltf',
+  crate: `${BASE}models/wooden_crate_01/wooden_crate_01_1k.gltf`,
+  bookSet: `${BASE}models/book_encyclopedia_set_01/book_encyclopedia_set_01_1k.gltf`,
+  candleholders: `${BASE}models/brass_candleholders/brass_candleholders_1k.gltf`,
 } as const;
 
 /**
