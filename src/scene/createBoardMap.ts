@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { sceneConfig } from '../config/sceneConfig.ts';
-import { BOARD_MAP_URL, loadTexture } from '../assets/AssetManager.ts';
+import { BOARD_MAP_URL, getPaperBump, loadTexture } from '../assets/AssetManager.ts';
 
 export interface BoardMapRefs {
   /** Główny mesh planszy — nazwa `boardMap`, UV 0..1, gotowy na raycast. */
@@ -39,8 +39,11 @@ export function createBoardMap(topY: number): BoardMapRefs {
 
   const mat = new THREE.MeshStandardMaterial({
     color: 0xf3e6c4,
-    roughness: 0.92,
+    roughness: 0.94,
     metalness: 0,
+    // Oddzielny, subtelny szum papieru — NIE skan mapy jako bump.
+    bumpMap: getPaperBump(),
+    bumpScale: 0.02,
   });
 
   const boardMap = new THREE.Mesh(geo, mat);
@@ -55,8 +58,6 @@ export function createBoardMap(topY: number): BoardMapRefs {
   loadTexture(BOARD_MAP_URL)
     .then((tex) => {
       mat.map = tex;
-      mat.bumpMap = tex;
-      mat.bumpScale = 0.03;
       mat.color.set(0xffffff);
       mat.needsUpdate = true;
     })

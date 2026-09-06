@@ -32,15 +32,16 @@ export const sceneConfig = {
   camera: {
     fov: 50,
     target: { x: 0, y: 0.85, z: 0 },
-    // Kadr startowy: cała plansza + stół + fragment komnaty, ~40° nad blatem.
-    startPosition: { x: 1.7, y: 2.25, z: 2.35 },
+    // Kadr startowy: cała plansza + stół + kandelabr + kominek w tle.
+    startPosition: { x: 2.2, y: 2.0, z: 3.0 },
     minDistance: 1.1,
     maxDistance: 5.4,
     minPolarAngle: 0.12,
     maxPolarAngle: 1.35,
   },
   lights: {
-    chandelierPosition: { x: 0.35, y: 2.62, z: -0.25 },
+    // Kandelabr nisko nad stołem, żeby wszedł w domyślny kadr.
+    chandelierPosition: { x: 0.35, y: 2.15, z: -0.25 },
     candleColor: 0xffb45c,
     fireColor: 0xff6a22,
   },

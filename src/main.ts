@@ -6,4 +6,8 @@ if (!canvas) {
   throw new Error('Nie znaleziono <canvas id="scene">');
 }
 
-createScene(canvas);
+createScene(canvas).catch((err) => {
+  console.error('[1600] błąd inicjalizacji sceny:', err);
+  const el = document.getElementById('loader-text');
+  if (el) el.textContent = 'Nie udało się wczytać sceny — szczegóły w konsoli.';
+});

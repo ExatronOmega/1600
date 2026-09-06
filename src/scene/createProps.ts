@@ -1,33 +1,34 @@
 import * as THREE from 'three';
+import { MODELS, makeFlameSprite } from '../assets/AssetManager.ts';
+import { groundObject, loadModelNode, normalizeSize } from '../assets/ModelLoader.ts';
 
 /**
- * Klimatyczne rekwizyty przy KRAWĘDZIACH stołu.
- * Środek i większość mapy zostają wolne pod przyszły gameplay
- * (karty, kości, pionki, ekonomia).
+ * Minimalizm na stole: mapa + 1 książka + kałamarz/pióro + świeca + docisk.
+ * Środek i większość mapy wolne pod przyszłe karty/pionki/kości.
  */
-export function createProps(topY: number): THREE.Group {
+export async function createProps(topY: number): Promise<THREE.Group> {
   const group = new THREE.Group();
   group.name = 'props';
 
   const brass = new THREE.MeshStandardMaterial({ color: 0x8a6b2f, roughness: 0.35, metalness: 0.9 });
-  const ironDark = new THREE.MeshStandardMaterial({ color: 0x2a2724, roughness: 0.55, metalness: 0.8 });
-  const glassInk = new THREE.MeshStandardMaterial({ color: 0x0d0f14, roughness: 0.15, metalness: 0.1 });
+  const glassInk = new THREE.MeshStandardMaterial({ color: 0x0d0f14, roughness: 0.12, metalness: 0.15 });
   const paperMat = new THREE.MeshStandardMaterial({ color: 0xd9c9a3, roughness: 0.95 });
-  const leatherMat = new THREE.MeshStandardMaterial({ color: 0x4a2c14, roughness: 0.8 });
-  const waxMat = new THREE.MeshStandardMaterial({ color: 0x6e1423, roughness: 0.5 });
 
-  const put = (m: THREE.Mesh, x: number, z: number, yOff = 0) => {
+  const put = (m: THREE.Object3D, x: number, z: number, yOff = 0) => {
     m.position.x += x;
     m.position.z += z;
     m.position.y += topY + yOff;
-    m.castShadow = true;
-    m.receiveShadow = true;
+    m.traverse((o) => {
+      if (o instanceof THREE.Mesh) {
+        o.castShadow = true;
+        o.receiveShadow = true;
+      }
+    });
     group.add(m);
     return m;
   };
 
-  // 1. Mosiężny docisk do mapy — LEŻY na zachodniej krawędzi arkusza
-  // (trzyma papier; krawędź, nie centrum — celowo na mapie).
+  // 1. Mosiężny docisk — na zachodniej krawędzi arkusza (trzyma papier).
   const weight = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.05, 16), brass);
   weight.position.y = 0.025;
   put(weight, -1.08, -0.6);
@@ -46,57 +47,43 @@ export function createProps(topY: number): THREE.Group {
   feather.position.y = 0.12;
   put(feather, 1.08, -0.55);
 
-  // 3. Zwinięty pergamin — wschodnia krawędź, związany sznurkiem.
-  const scroll = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.5, 12), paperMat);
-  scroll.rotation.z = Math.PI / 2;
-  scroll.rotation.y = 0.25;
-  scroll.position.y = 0.035;
-  put(scroll, 1.25, 0.45);
-  const cord = new THREE.Mesh(new THREE.TorusGeometry(0.037, 0.006, 6, 14), leatherMat);
-  cord.rotation.y = Math.PI / 2 + 0.25;
-  cord.position.y = 0.035;
-  put(cord, 1.25, 0.45);
+  // 3. Jedna książka ze zbioru (GLB) — leży płasko na wschodnim pasie stołu.
+  try {
+    const book = await loadModelNode(MODELS.bookSet, 'book_encyclopedia_set_01_book01');
+    normalizeSize(book, 0.26);
+    // Połóż na płasko: najmniejszy wymiar bboxa ma być osią Y.
+    const dims = new THREE.Box3().setFromObject(book).getSize(new THREE.Vector3());
+    if (dims.y <= dims.x && dims.y <= dims.z) {
+      // już płaska — nic nie rób
+    } else if (dims.x <= dims.z) {
+      book.rotation.z = Math.PI / 2;
+    } else {
+      book.rotation.x = Math.PI / 2;
+    }
+    const flat = new THREE.Group();
+    flat.add(book);
+    groundObject(flat);
+    flat.rotation.y = 0.35;
+    flat.name = 'table-book';
+    put(flat, 1.27, 0.05);
+  } catch (err) {
+    console.warn('[props] pominięto książkę na stole:', err);
+  }
 
-  // 4. Pieczęć lakowa + moneta — wolny pas na zachód od mapy.
-  const seal = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.02, 14), waxMat);
-  seal.position.y = 0.01;
-  put(seal, -1.4, 0.35);
-  const sealStamp = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 0.05, 10), ironDark);
-  sealStamp.rotation.z = Math.PI / 2 - 0.15;
-  sealStamp.position.y = 0.025;
-  put(sealStamp, -1.4, 0.52);
-  const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.005, 16), brass);
-  coin.position.y = 0.003;
-  put(coin, -1.41, 0.18);
-
-  // 5. Zamknięta księga / notes — wschodni pas stołu, poza mapą.
-  const book = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.05, 0.32), leatherMat);
-  book.rotation.y = 0.3;
-  book.position.y = 0.025;
-  put(book, 1.27, -0.02);
-  const bookBand = new THREE.Mesh(new THREE.BoxGeometry(0.245, 0.052, 0.06), ironDark);
-  bookBand.rotation.y = 0.3;
-  bookBand.position.y = 0.025;
-  put(bookBand, 1.27, -0.02);
-
-  // 6. Mała świeca stołowa (emisja, bez własnego światła) — północno-zachodni róg.
+  // 4. Mała świeca stołowa (sprite, bez własnego światła).
   const tableCandle = new THREE.Mesh(
     new THREE.CylinderGeometry(0.025, 0.03, 0.14, 10),
-    new THREE.MeshStandardMaterial({ color: 0xe6d9b8, roughness: 0.6 }),
+    new THREE.MeshStandardMaterial({ color: 0xe2d4ae, roughness: 0.55 }),
   );
   tableCandle.position.y = 0.07;
   put(tableCandle, -1.42, -0.78);
-  const tableFlame = new THREE.Mesh(
-    new THREE.SphereGeometry(0.014, 8, 8),
-    new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffb45c, emissiveIntensity: 3 }),
-  );
-  tableFlame.scale.set(0.8, 1.6, 0.8);
-  tableFlame.position.y = 0.165;
-  tableFlame.name = 'table-flame';
-  put(tableFlame, -1.42, -0.78);
   const holder = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.015, 14), brass);
   holder.position.y = 0.008;
   put(holder, -1.42, -0.78);
+  const tableFlame = makeFlameSprite(0.07);
+  tableFlame.position.y = 0.17;
+  tableFlame.name = 'table-flame';
+  put(tableFlame, -1.42, -0.78);
 
   return group;
 }
